@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.user.dao.RoleDao">
+
+	<resultMap type="Role" id="user">
+		<id column="rid" property="rid" />
+		<result column="rname" property="rname" />
+		<collection property="powers" ofType="Power">
+			<id column="id" property="id" />
+			<result column="name" property="name" />
+		</collection>
+	</resultMap>
+	<select id="list" resultMap="user">
+		SELECT
+		r.*,
+		p.*
+		FROM role r
+		LEFT JOIN role_power rp
+		ON r.rid=rp.rid LEFT JOIN
+		power p ON p.id=rp.pid
+	</select>
+	
+	<select id="power" resultType="Power" parameterType="string">
+		SELECT * from power where pid=${value}
+	</select>
+	
+	<insert id="insert" parameterType="Role">
+		<selectKey keyProperty="rid" order="AFTER" resultType="string">
+			select
+			LAST_INSERT_ID();
+		</selectKey>
+		insert into role set
+		rname=#{rname}
+	</insert>
+	<insert id="insertRole" parameterType="map">
+		insert into role_power(rid,pid) values
+		<foreach collection="list" item="l" separator=",">
+			(${rid},${l})
+		</foreach>
+	</insert>
+	<delete id="delete" parameterType="string">
+		delete from role_power where
+		rid=#{id}
+	</delete>
+	<update id="update" parameterType="Role"> update role set
+		rname=#{rname}
+		where rid=#{rid}
+	</update>
+
+</mapper>
